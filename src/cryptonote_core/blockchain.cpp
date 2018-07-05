@@ -1006,23 +1006,26 @@ bool Blockchain::switch_to_alternative_blockchain(std::list<blocks_ext_by_hash::
 //------------------------------------------------------------------
 // This function calculates the difficulty target for the block being added to
 // an alternate chain.
+
 difficulty_type Blockchain::get_next_difficulty_for_alternative_chain(const std::list<blocks_ext_by_hash::iterator>& alt_chain, block_extended_info& bei) const
 {
   LOG_PRINT_L3("Blockchain::" << __func__);
   std::vector<uint64_t> timestamps;
   std::vector<difficulty_type> cumulative_difficulties;
+  //size_t difficult_block_count = get_current_hard_fork_version() < 2 ? DIFFICULTY_BLOCKS_COUNT : DIFFICULTY_BLOCKS_COUNT_V3;
 
   size_t difficult_block_count;
 
   if(get_current_hard_fork_version() < 2){
-  difficult_block_count = DIFFICULTY_BLOCKS_COUNT;
+    difficult_block_count = DIFFICULTY_BLOCKS_COUNT;
   }
   else if(get_current_hard_fork_version() < 4){
-  difficult_block_count = DIFFICULTY_BLOCKS_COUNT_V3;
+    difficult_block_count = DIFFICULTY_BLOCKS_COUNT_V3;
   }
   else{
-  difficult_block_count = DIFFICULTY_BLOCKS_COUNT_V4;
+    difficult_block_count = DIFFICULTY_BLOCKS_COUNT_V4;
   }
+
   // if the alt chain isn't long enough to calculate the difficulty target
   // based on its blocks alone, need to get more blocks from the main chain
   if(alt_chain.size()< difficult_block_count)
@@ -1074,11 +1077,24 @@ difficulty_type Blockchain::get_next_difficulty_for_alternative_chain(const std:
   }
 
   // FIXME: This will fail if fork activation heights are subject to voting
-  size_t target = get_ideal_hard_fork_version(bei.height) < 2 ? DIFFICULTY_TARGET_V1 : DIFFICULTY_TARGET_V2;
+  size_t target = DIFFICULTY_TARGET;
 
   // calculate the difficulty target for the block and return it
-  return next_difficulty(timestamps, cumulative_difficulties, target);
+  //return get_current_hard_fork_version() < 2 ?
+  //next_difficulty(timestamps, cumulative_difficulties, target) :
+  //next_difficulty_v3(timestamps, cumulative_difficulties, target, true);
+
+  if(get_current_hard_fork_version() < 2){
+    return next_difficulty(timestamps, cumulative_difficulties, target);
+  }
+  if(get_current_hard_fork_version() < 4){
+    return next_difficulty_v3(timestamps, cumulative_difficulties, target, true);
+  }
+  else{
+    return next_difficulty_v4(timestamps, cumulative_difficulties, target);
+  }
 }
+
 //------------------------------------------------------------------
 // This function does a sanity check on basic things that all miner
 // transactions have in common, such as:

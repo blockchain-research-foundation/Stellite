@@ -373,7 +373,6 @@ difficulty_type next_difficulty_v4(std::vector<std::uint64_t> timestamps, std::v
     int lastShortTimeInARaw = 0;
 
     int nbLongTsLastNBlocks = 0;
-    bool lastTimeWasLong=false;
 
     if (true) {
         uint64_t previous_max = timestamps[0];
@@ -405,9 +404,6 @@ difficulty_type next_difficulty_v4(std::vector<std::uint64_t> timestamps, std::v
                 }
                 if(timespan >100) {
                     nbLongTsLastNBlocks ++;
-                    lastTimeWasLong = true;
-                } else {
-                    lastTimeWasLong = false;
                 }
             }
 
